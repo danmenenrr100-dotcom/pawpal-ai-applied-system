@@ -71,46 +71,94 @@
 - What is one important thing you learned about designing systems or working with AI on this project?
 
 
-duration + priority
-daily schedule/plan
-constraints
-explanation of reasoning
-tests for scheduling behavior
+##  Answers for Reflection -------------------------------------------------------------------
 
+# PawPal+ Project Reflection
 
-## 1a. Initial design
+## 1. System Design
 
-For the initial design of PawPal+, I chose four main classes: Owner, Pet, Task, and Scheduler.
+**a. Initial design**
 
-The Owner class represents the person using the app. It stores the owner’s name, preferences, and pets. The Pet class represents each animal and stores details such as name, species, age, and the pet’s care tasks. The Task class represents one care activity, such as feeding, walking, medication, grooming, or enrichment. Each task stores details like duration, priority, preferred time, frequency, and completion status. The Scheduler class is responsible for organizing tasks into a daily plan, sorting tasks by priority or time, detecting conflicts, and explaining why a plan was chosen.
+For my initial UML design, I included four main classes: `Owner`, `Pet`, `Task`, and `Scheduler`.
 
-I chose this structure because it matches the real-world relationship of the system: an owner has pets, pets have tasks, and the scheduler organizes those tasks into a useful care plan.
+The `Owner` class represents the person using PawPal+. It stores the owner’s name, preferences, and list of pets. The `Pet` class represents each animal and stores details such as name, species, age, and that pet’s care tasks. The `Task` class represents one care activity, such as feeding, walking, medication, grooming, or enrichment. Each task stores information such as title, task type, duration, priority, preferred time, frequency, and completion status. The `Scheduler` class is responsible for organizing the tasks by sorting them, filtering them, generating a daily plan, detecting conflicts, handling recurring tasks, and explaining why a plan was chosen.
 
-In Phase 2, I translated my UML design into working Python code. I implemented the Owner, Pet, Task, and Scheduler classes in `pawpal_system.py`. The Owner class manages pets, the Pet class stores care tasks, the Task class tracks details like duration, priority, preferred time, frequency, and completion status, and the Scheduler class generates a daily care plan based on available time and task priority.
+I chose this design because it matches the real-world structure of the app: an owner has pets, pets have tasks, and the scheduler organizes those tasks into a useful daily care plan.
 
-I verified the backend logic using a CLI-first workflow by creating `main.py`. This helped me confirm that the system could create pets, add tasks, generate a daily plan, explain the plan, and detect scheduling conflicts before connecting anything to the Streamlit interface. I also added initial pytest tests for task completion and adding tasks to a pet.
+**b. Design changes**
 
-2b. Tradeoffs
+Yes, my design changed during implementation. At first, the system was mostly focused on basic task storage. During the project, I added more responsibility to the `Scheduler` class so it could act as the main logic layer. I added methods for filtering tasks, generating a daily plan based on available time, marking tasks complete, detecting conflicts, and explaining the plan.
 
-One tradeoff in my scheduler is that conflict detection only checks for exact matching preferred times. For example, if two tasks are both scheduled at 08:00, the system flags a conflict. However, it does not detect overlapping durations, such as one task from 08:00–08:30 and another task at 08:15.
+Another change was adding `recurrence_generated` to the `Task` class. This helped prevent recurring tasks from creating duplicate future tasks after completion. I made this change because the system needed a safe way to handle daily or weekly tasks without repeatedly adding the same next task.
 
-I chose this simpler approach because my current Task class stores a preferred time and duration, but the conflict detection logic is still lightweight. This keeps the algorithm easier to understand and test. A future improvement would be to calculate start and end times so PawPal+ can detect real overlapping task windows.
+---
 
-### a. What went well
+## 2. Scheduling Logic and Tradeoffs
 
-The part of this project I am most satisfied with is the way the backend logic, CLI demo, tests, and Streamlit UI now work together. I started with a UML design, translated it into Python classes, tested the logic in `main.py`, and then connected it to the app interface. The Scheduler class became the main logic layer for sorting tasks, filtering tasks, generating a daily plan, detecting conflicts, and explaining the schedule.
+**a. Constraints and priorities**
 
-The AI coding assistant was most helpful for brainstorming the class structure, generating method skeletons, suggesting scheduling algorithms, and helping create pytest tests. It helped me move faster, but I still had to review the code and decide what matched the project requirements.
+The scheduler considers several constraints: task priority, task duration, preferred time, completion status, frequency, and the owner’s available care time. The most important constraint is priority because high-priority tasks like medication or walks should be chosen before lower-priority tasks. The second major constraint is available time because the scheduler should only include tasks that fit within the amount of time the owner has.
 
-One AI suggestion I rejected was using a separate `pawpal.py` file instead of the required `pawpal_system.py`. I kept the project aligned with the assignment instructions by using `pawpal_system.py` as the main logic layer.
+The scheduler first sorts incomplete tasks by priority, then adds tasks to the daily plan as long as they fit within the available minutes. After choosing the tasks, it sorts the final plan by preferred time so the schedule is easier to read.
 
-Using separate work phases helped me stay organized. I handled UML design first, then backend implementation, then UI integration, then algorithms, then tests, then final documentation. This made the project easier to manage and prevented me from mixing too many tasks at once.
+**b. Tradeoffs**
 
-### b. What you would improve
+One tradeoff in my scheduler is that conflict detection only checks for exact matching preferred times. For example, if two tasks are both scheduled at `08:00`, the system flags a conflict. However, it does not detect overlapping durations, such as one task from `08:00–08:30` overlapping with another task at `08:15`.
 
-If I had another iteration, I would improve the scheduler by detecting overlapping task durations instead of only checking exact matching preferred times. Right now, the system can detect two tasks both scheduled at `08:00`, but it does not detect a task from `08:00–08:30` overlapping with another task at `08:15`.
+This tradeoff is reasonable for this version of the project because the scheduler is meant to be simple, readable, and easy to test. The current system stores task duration, but the conflict logic does not yet calculate full start and end time ranges. A future version could improve this by converting preferred times into real time objects and checking for overlapping time windows.
 
-I would also add persistent data storage so pets and tasks remain saved after the Streamlit app closes. Another improvement would be stronger input validation for preferred time formatting, such as requiring `HH:MM` format.
+---
 
-This project helped me understand that being the lead architect means I cannot blindly accept AI-generated code. I need to review the design, keep the system simple, follow the assignment requirements, and make the final decisions about what belongs in the project.
+## 3. AI Collaboration
+
+**a. How you used AI**
+
+I used AI tools for design brainstorming, UML planning, Python class scaffolding, debugging, algorithm planning, test generation, and documentation support. AI was helpful for turning the project requirements into a clear class structure and for suggesting methods that matched the responsibilities of each class.
+
+The most helpful prompts were specific ones, such as asking how the `Scheduler` should retrieve tasks from the owner’s pets, how to sort tasks by preferred time, how to detect conflicts, and how to create pytest tests for the scheduler. Breaking the work into separate phases helped me use AI more effectively because each chat focused on one task instead of mixing design, coding, testing, and documentation all at once.
+
+**b. Judgment and verification**
+
+One moment where I did not accept an AI suggestion as-is was when the AI assistant created or suggested a file named `pawpal.py`. The assignment specifically required the backend logic file to be named `pawpal_system.py`, so I rejected that file name and corrected the project structure.
+
+I evaluated AI suggestions by checking them against the assignment instructions, running the code in the terminal, testing the Streamlit app, and running `python -m pytest`. I did not rely only on whether the code looked correct. I verified that the backend worked through `main.py`, that the tests passed, and that the UI actually used the classes from `pawpal_system.py`.
+
+---
+
+## 4. Testing and Verification
+
+**a. What you tested**
+
+I tested the most important backend behaviors in PawPal+. The tests verify that a task can be marked complete, a task can be added to a pet, tasks can be sorted by preferred time, tasks can be filtered by pet and completion status, recurring tasks create a new task after completion, and conflicts are detected when two tasks have the same preferred time.
+
+These tests were important because they confirm that the main scheduling logic works before relying on the Streamlit interface. The tests also helped verify that the system’s core classes work together correctly.
+
+**b. Confidence**
+
+I am confident that the scheduler works correctly for the required project features. The test suite passes, the CLI demo works, and the Streamlit UI successfully connects to the backend logic. I would rate my confidence as four out of five stars.
+
+If I had more time, I would test additional edge cases, such as invalid time formats, tasks with zero or negative duration, overlapping tasks based on duration, duplicate pet names, duplicate task names, and saving data after the app closes.
+
+---
+
+## 5. Reflection
+
+**a. What went well**
+
+The part of this project I am most satisfied with is how the backend logic, CLI demo, tests, UML diagram, and Streamlit UI all connect together. I started with a design, turned it into Python classes, verified it in the terminal, added tests, and then connected the logic to the app interface.
+
+I am also satisfied with the `Scheduler` class because it became the main logic layer for sorting, filtering, generating plans, detecting conflicts, and explaining the schedule.
+
+**b. What you would improve**
+
+If I had another iteration, I would improve the scheduler by detecting overlapping task durations instead of only checking exact matching preferred times. I would also add persistent storage so the owner, pets, and tasks remain saved after the Streamlit app closes.
+
+Another improvement would be stronger input validation. For example, the app could require preferred times to use a valid `HH:MM` format instead of accepting any text.
+
+**c. Key takeaway**
+
+One important thing I learned is that being the lead architect means making the final decisions, even when AI provides code quickly. AI was useful for brainstorming, scaffolding, and debugging, but I still had to check the assignment requirements, keep the design simple, test the system, and decide what belonged in the final project.
+
+This project helped me understand that good system design comes from separating responsibilities clearly. The `Owner`, `Pet`, `Task`, and `Scheduler` classes each have a specific purpose, which made the project easier to build, test, and explain.
+
 
