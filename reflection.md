@@ -69,3 +69,19 @@
 **c. Key takeaway**
 
 - What is one important thing you learned about designing systems or working with AI on this project?
+
+
+duration + priority
+daily schedule/plan
+constraints
+explanation of reasoning
+tests for scheduling behavior
+
+
+## 1a. Initial design
+
+For the initial design of PawPal+, I chose four main classes: Owner, Pet, Task, and Scheduler.
+
+The Owner class represents the person using the app. It stores the owner’s name, preferences, and pets. The Pet class represents each animal and stores details such as name, species, age, and the pet’s care tasks. The Task class represents one care activity, such as feeding, walking, medication, grooming, or enrichment. Each task stores details like duration, priority, preferred time, frequency, and completion status. The Scheduler class is responsible for organizing tasks into a daily plan, sorting tasks by priority or time, detecting conflicts, and explaining why a plan was chosen.
+
+I chose this structure because it matches the real-world relationship of the system: an owner has pets, pets have tasks, and the scheduler organizes those tasks into a useful care plan.
