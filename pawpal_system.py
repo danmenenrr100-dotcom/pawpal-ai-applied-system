@@ -13,6 +13,7 @@ class Task:
     preferred_time: str
     frequency: str = "once"
     completed: bool = False
+    recurrence_generated: bool = False
 
     def mark_complete(self) -> None:
         """Mark this task as completed."""
@@ -64,6 +65,18 @@ class Pet:
         """Return all tasks for this pet."""
         return self.tasks
 
+    def get_pending_tasks(self) -> List[Task]:
+        """Return incomplete tasks for this pet."""
+        return [task for task in self.tasks if not task.completed]
+
+    def find_task(self, task_title: str) -> Optional[Task]:
+        """Find a task by title."""
+        for task in self.tasks:
+            if task.title.lower() == task_title.lower():
+                return task
+
+        return None
+
 
 @dataclass
 class Owner:
@@ -98,6 +111,16 @@ class Owner:
 class Scheduler:
     """Organizes tasks into a daily pet care plan."""
 
+    def get_task_records(self, owner: Owner) -> List[tuple[Pet, Task]]:
+        """Return pet-task pairs for every task owned by an owner."""
+        records = []
+
+        for pet in owner.pets:
+            for task in pet.get_tasks():
+                records.append((pet, task))
+
+        return records
+
     def sort_tasks_by_priority(self, tasks: List[Task]) -> List[Task]:
         """Sort tasks by priority."""
         return sorted(tasks, key=lambda task: task.priority)
@@ -105,6 +128,30 @@ class Scheduler:
     def sort_tasks_by_time(self, tasks: List[Task]) -> List[Task]:
         """Sort tasks by preferred time."""
         return sorted(tasks, key=lambda task: task.preferred_time)
+
+    def filter_tasks(
+        self,
+        owner: Owner,
+        pet_name: Optional[str] = None,
+        completed: Optional[bool] = None,
+        task_type: Optional[str] = None,
+    ) -> List[tuple[Pet, Task]]:
+        """Filter tasks by pet name, completion status, or task type."""
+        filtered_records = []
+
+        for pet, task in self.get_task_records(owner):
+            if pet_name is not None and pet.name.lower() != pet_name.lower():
+                continue
+
+            if completed is not None and task.completed != completed:
+                continue
+
+            if task_type is not None and task.task_type.lower() != task_type.lower():
+                continue
+
+            filtered_records.append((pet, task))
+
+        return filtered_records
 
     def generate_daily_plan(self, owner: Owner, available_minutes: int) -> List[Task]:
         """Generate a daily plan based on task priority and available time."""
@@ -122,6 +169,24 @@ class Scheduler:
                 used_minutes += task.duration_minutes
 
         return self.sort_tasks_by_time(plan)
+
+    def mark_task_complete(self, pet: Pet, task_title: str) -> Optional[Task]:
+        """Mark a task complete and create a recurring task if needed."""
+        task = pet.find_task(task_title)
+
+        if task is None:
+            return None
+
+        task.mark_complete()
+
+        if task.is_recurring() and not task.recurrence_generated:
+            next_task = task.generate_next_occurrence()
+            task.recurrence_generated = True
+
+            if next_task is not None:
+                pet.add_task(next_task)
+
+        return task
 
     def detect_conflicts(self, tasks: List[Task]) -> List[str]:
         """Detect tasks with the same preferred time."""
@@ -144,6 +209,10 @@ class Scheduler:
         if not plan:
             return "No tasks were selected because there were no available tasks or not enough available time."
 
-        explanation = "This plan was selected by prioritizing important incomplete tasks that fit within the available time."
+        total_minutes = sum(task.duration_minutes for task in plan)
 
-        return explanation
+        return (
+            f"This plan was selected by prioritizing incomplete tasks with the highest importance "
+            f"while staying within the available time. The final plan includes {len(plan)} task(s) "
+            f"and uses {total_minutes} total minute(s)."
+        )

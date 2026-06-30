@@ -111,3 +111,18 @@ This plan was selected by prioritizing important incomplete tasks that fit withi
 Conflict Check
 ----------------------------------------
 Conflict: Medication and Morning Walk are both scheduled at 08:00.
+
+## 📐 Smarter Scheduling
+
+PawPal+ includes scheduling logic that makes the system more useful than a basic task list.
+
+| Feature | Method(s) | Notes |
+|---------|-----------|-------|
+| Task sorting by priority | `Scheduler.sort_tasks_by_priority()` | Tasks with lower priority numbers are treated as more important. |
+| Task sorting by time | `Scheduler.sort_tasks_by_time()` | Tasks are displayed in order by preferred time. |
+| Daily plan generation | `Scheduler.generate_daily_plan()` | Builds a plan using incomplete tasks that fit within the owner’s available care time. |
+| Filtering | `Scheduler.filter_tasks()` | Filters tasks by pet name, completion status, or task type. |
+| Conflict handling | `Scheduler.detect_conflicts()` | Warns when two tasks have the same preferred time. |
+| Recurring tasks | `Task.generate_next_occurrence()` and `Scheduler.mark_task_complete()` | Creates a new task when a daily or weekly recurring task is completed. |
+| Plan explanation | `Scheduler.explain_plan()` | Explains why the plan was selected. |
+
