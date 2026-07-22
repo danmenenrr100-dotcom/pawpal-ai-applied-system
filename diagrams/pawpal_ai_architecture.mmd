@@ -1,0 +1,23 @@
+flowchart TD
+    U["Pet owner"] --> UI["Streamlit interface"]
+    UI --> A["PawPal AI agent"]
+    A --> G["Request guardrail"]
+
+    G -->|Allowed| R["Multi-source retrieval"]
+    G -->|Urgent or unsafe| S["Safe response"]
+
+    K["General pet-care guidance"] --> R
+    P["Pet-specific notes"] --> R
+    R --> E["Evidence and citations"]
+
+    E --> T["Task safety and input validation"]
+    T --> PL["Priority-based scheduling"]
+    PL --> V["Plan validation"]
+
+    V -->|Passed| O["Validated AgentResult"]
+    V -->|Conflict found| X["One revision attempt"]
+    X --> V
+    V -->|Still invalid| S
+
+    O --> UI
+    S --> UI
